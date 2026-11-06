@@ -54,12 +54,66 @@ const valoresLista = [
     { titulo: "La Responsabilidad", desc: "Cumplir tus compromisos y tareas con esmero.", tip: "Termina tus deberes escolares antes de ir a jugar." }
 ];
 
+// INICIALIZACIÓN DE LA APLICACIÓN
 document.addEventListener("DOMContentLoaded", () => {
     cargarMateria('espanol');
     renderizarValores();
     renderizarLecturas();
     renderizarRecompensas();
+
+    // COMPROBAR SI SE ESCANEO EL QR DEL CARNET PARA VER LA FICHA PÚBLICA
+    const urlParams = new URLSearchParams(window.location.search);
+    const verFichaToken = urlParams.get('ver_ficha');
+
+    if (verFichaToken) {
+        mostrarFichaPublica(verFichaToken);
+    }
 });
+
+// CONSULTA Y MUESTRA DE FICHA PÚBLICA AL ESCANEAR EL CARNET
+async function mostrarFichaPublica(token) {
+    try {
+        const res = await fetch(`/api/nino/ficha-publica/${token}`);
+        const data = await res.json();
+        if (data.success) {
+            document.getElementById('modal-ficha-nombre').textContent = data.nino.nombre;
+            document.getElementById('modal-ficha-grado').textContent = data.nino.grado_escolar;
+            document.getElementById('modal-ficha-estrellas').textContent = data.nino.estrellas;
+            document.getElementById('modal-ficha-nivel').textContent = data.nino.nivel;
+            document.getElementById('modal-ficha-edad').textContent = data.nino.edad + " años";
+            document.getElementById('modal-ficha-qr').textContent = data.nino.codigo_qr;
+
+            document.getElementById('modal-ficha-publica').classList.add('active');
+            window.history.replaceState({}, document.title, window.location.pathname);
+        } else {
+            alert("Credencial de Explorador no encontrada.");
+        }
+    } catch (err) {
+        console.error("Error consultando ficha pública:", err);
+    }
+}
+
+function cerrarModalFicha() {
+    document.getElementById('modal-ficha-publica').classList.remove('active');
+}
+
+function actualizarEstadoNiñoGlobal(nino) {
+    estadoUsuario.nino_id = nino.id;
+    estadoUsuario.nombre = nino.nombre;
+    estadoUsuario.edad = nino.edad;
+    estadoUsuario.grado = nino.grado_escolar;
+    estadoUsuario.genero = nino.genero;
+    estadoUsuario.codigo_qr = nino.codigo_qr;
+    estadoUsuario.estrellas = nino.estrellas;
+    estadoUsuario.nivel = nino.nivel;
+
+    document.getElementById('nombre-nino-activo').textContent = nino.nombre;
+    document.getElementById('contador-estrellas').textContent = nino.estrellas;
+    document.getElementById('nivel-usuario').textContent = `Nivel ${nino.nivel}`;
+    
+    const lblSesion = document.getElementById('lbl-sesion');
+    if (lblSesion) lblSesion.textContent = `Explorador: ${nino.nombre}`;
+}
 
 function mostrarPantalla(id) {
     document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
@@ -168,8 +222,7 @@ function canjearPremios(costo) {
     }
 }
 
-// ---------------- RETOS MATEMÁTICOS ----------------
-
+// RETOS MATEMÁTICOS
 function iniciarJuegoMate(modo) {
     document.getElementById('arena-mate').classList.remove('hidden');
     juegoMate.n1 = Math.floor(Math.random() * 10) + 1;
@@ -203,19 +256,16 @@ function verificarRespuestaMate() {
     }
 }
 
-// ---------------- AUTENTICACIÓN Y ABCM ----------------
-
+// AUTENTICACIÓN Y ABCM TUTOR
 function abrirModalAuth() { document.getElementById('modal-auth').classList.add('active'); }
 function cerrarModalAuth() { document.getElementById('modal-auth').classList.remove('active'); }
 
 function verTabAuth(tab) {
     document.getElementById('form-login-tutor').classList.add('hidden');
     document.getElementById('form-reg-tutor').classList.add('hidden');
-    document.getElementById('box-login-qr').classList.add('hidden');
 
     document.getElementById('tab-auth-login').classList.remove('active');
     document.getElementById('tab-auth-registro').classList.remove('active');
-    document.getElementById('tab-auth-qr').classList.remove('active');
 
     if(tab === 'login') {
         document.getElementById('form-login-tutor').classList.remove('hidden');
@@ -224,10 +274,6 @@ function verTabAuth(tab) {
     if(tab === 'registro') {
         document.getElementById('form-reg-tutor').classList.remove('hidden');
         document.getElementById('tab-auth-registro').classList.add('active');
-    }
-    if(tab === 'qr') {
-        document.getElementById('box-login-qr').classList.remove('hidden');
-        document.getElementById('tab-auth-qr').classList.add('active');
     }
 }
 
@@ -336,19 +382,7 @@ async function seleccionarNinoSesion(id) {
         const data = await res.json();
         
         if (data.success) {
-            estadoUsuario.nino_id = data.nino.id;
-            estadoUsuario.nombre = data.nino.nombre;
-            estadoUsuario.edad = data.nino.edad;
-            estadoUsuario.grado = data.nino.grado_escolar;
-            estadoUsuario.genero = data.nino.genero;
-            estadoUsuario.codigo_qr = data.nino.codigo_qr;
-            estadoUsuario.estrellas = data.nino.estrellas;
-            estadoUsuario.nivel = data.nino.nivel;
-
-            document.getElementById('nombre-nino-activo').textContent = data.nino.nombre;
-            document.getElementById('contador-estrellas').textContent = data.nino.estrellas;
-            document.getElementById('nivel-usuario').textContent = `Nivel ${data.nino.nivel}`;
-            
+            actualizarEstadoNiñoGlobal(data.nino);
             cerrarModalAuth();
             mostrarPantalla('inicio');
             alert(`¡Sesión iniciada como ${data.nino.nombre}! 🎉`);
@@ -357,25 +391,6 @@ async function seleccionarNinoSesion(id) {
         }
     } catch (err) {
         alert("Error de conexión al seleccionar el perfil.");
-    }
-}
-
-async function loginNinoQR() {
-    const code = document.getElementById('qr-code-input').value;
-    if (!code) {
-        alert("Por favor ingresa un código QR.");
-        return;
-    }
-    const res = await fetch('/api/nino/login-qr', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ codigo_qr: code })
-    });
-    const data = await res.json();
-    if(data.success) {
-        seleccionarNinoSesion(data.nino.id);
-    } else {
-        alert(data.msg || "Código QR no encontrado.");
     }
 }
 
