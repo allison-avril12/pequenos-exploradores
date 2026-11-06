@@ -65,7 +65,8 @@ function mostrarPantalla(id) {
     document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
     document.querySelectorAll('.bottom-nav .nav-item').forEach(n => n.classList.remove('active'));
     
-    document.getElementById(`sec-${id}`).classList.add('active');
+    const targetSec = document.getElementById(`sec-${id}`);
+    if (targetSec) targetSec.classList.add('active');
     
     const btnNav = document.getElementById(`btn-nav-${id}`);
     if (btnNav) btnNav.classList.add('active');
@@ -76,15 +77,21 @@ function mostrarPantalla(id) {
 }
 
 function cargarMateria(clave) {
+    document.querySelectorAll('.sub-tab').forEach(btn => btn.classList.remove('active'));
+    const activeSubTab = document.getElementById(`btn-subtab-${clave}`);
+    if(activeSubTab) activeSubTab.classList.add('active');
+
     const data = materiasData[clave];
     const box = document.getElementById('materia-contenido-box');
-    box.innerHTML = `
-        <div class="subject-card">
-            <h3><i class="fa-solid ${data.icono}"></i> ${data.titulo}</h3>
-            <p>${data.desc}</p>
-            <button class="btn-primary" style="margin-top: 15px;" onclick="sumarEstrellas(2)">Completar Módulo (+2 ⭐)</button>
-        </div>
-    `;
+    if (box && data) {
+        box.innerHTML = `
+            <div class="subject-card">
+                <h3><i class="fa-solid ${data.icono}"></i> ${data.titulo}</h3>
+                <p>${data.desc}</p>
+                <button class="btn-primary" style="margin-top: 15px;" onclick="sumarEstrellas(2)">Completar Módulo (+2 ⭐)</button>
+            </div>
+        `;
+    }
 }
 
 function renderizarValores() {
@@ -186,12 +193,12 @@ function verificarRespuestaMate() {
     const val = parseInt(document.getElementById('resp-mate-input').value);
     const feedback = document.getElementById('feedback-mate');
     if (val === juegoMate.resp) {
-        feedback.style.color = 'var(--success)';
+        feedback.style.color = 'var(--success, green)';
         feedback.textContent = '¡Correcto! +2 estrellas ⭐';
         sumarEstrellas(2);
         setTimeout(() => iniciarJuegoMate('suma'), 1500);
     } else {
-        feedback.style.color = 'var(--accent)';
+        feedback.style.color = 'var(--accent, red)';
         feedback.textContent = 'Inténtalo de nuevo.';
     }
 }
@@ -206,9 +213,22 @@ function verTabAuth(tab) {
     document.getElementById('form-reg-tutor').classList.add('hidden');
     document.getElementById('box-login-qr').classList.add('hidden');
 
-    if(tab === 'login') document.getElementById('form-login-tutor').classList.remove('hidden');
-    if(tab === 'registro') document.getElementById('form-reg-tutor').classList.remove('hidden');
-    if(tab === 'qr') document.getElementById('box-login-qr').classList.remove('hidden');
+    document.getElementById('tab-auth-login').classList.remove('active');
+    document.getElementById('tab-auth-registro').classList.remove('active');
+    document.getElementById('tab-auth-qr').classList.remove('active');
+
+    if(tab === 'login') {
+        document.getElementById('form-login-tutor').classList.remove('hidden');
+        document.getElementById('tab-auth-login').classList.add('active');
+    }
+    if(tab === 'registro') {
+        document.getElementById('form-reg-tutor').classList.remove('hidden');
+        document.getElementById('tab-auth-registro').classList.add('active');
+    }
+    if(tab === 'qr') {
+        document.getElementById('box-login-qr').classList.remove('hidden');
+        document.getElementById('tab-auth-qr').classList.add('active');
+    }
 }
 
 async function loginTutor(e) {
@@ -237,22 +257,26 @@ async function loginTutor(e) {
 
 async function registroTutor(e) {
     e.preventDefault();
-    const res = await fetch('/api/tutor/registro', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-            nombre: document.getElementById('reg-nombre').value,
-            email: document.getElementById('reg-email').value,
-            password: document.getElementById('reg-pwd').value,
-            telefono: document.getElementById('reg-tel').value
-        })
-    });
-    const data = await res.json();
-    if(data.success) {
-        alert("Registro exitoso. Inicia sesión.");
-        verTabAuth('login');
-    } else {
-        alert(data.msg);
+    try {
+        const res = await fetch('/api/tutor/registro', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                nombre: document.getElementById('reg-nombre').value,
+                email: document.getElementById('reg-email').value,
+                password: document.getElementById('reg-pwd').value,
+                telefono: document.getElementById('reg-tel').value
+            })
+        });
+        const data = await res.json();
+        if(data.success) {
+            alert("Registro exitoso. Ahora puedes ingresar.");
+            verTabAuth('login');
+        } else {
+            alert(data.msg || "Error al registrarse.");
+        }
+    } catch (err) {
+        alert("Ocurrió un error al enviar el registro.");
     }
 }
 
@@ -260,7 +284,7 @@ async function cargarListaNinosABCM() {
     const res = await fetch('/api/ninos');
     const data = await res.json();
     const box = document.getElementById('lista-ninos-abcm');
-    if(data.success) {
+    if(data.success && box) {
         box.innerHTML = data.ninos.map(n => `
             <div class="abcm-item" style="background:#f8f9fa; padding:12px; border-radius:10px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
                 <div>
@@ -294,6 +318,8 @@ async function altaNino(e) {
         document.getElementById('alta-edad').value = '';
         document.getElementById('alta-grado').value = '';
         cargarListaNinosABCM();
+    } else {
+        alert(data.msg || "Error al dar de alta al niño.");
     }
 }
 
@@ -336,6 +362,10 @@ async function seleccionarNinoSesion(id) {
 
 async function loginNinoQR() {
     const code = document.getElementById('qr-code-input').value;
+    if (!code) {
+        alert("Por favor ingresa un código QR.");
+        return;
+    }
     const res = await fetch('/api/nino/login-qr', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},

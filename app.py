@@ -13,7 +13,6 @@ app.secret_key = os.environ.get('SECRET_KEY', 'pequenos_exploradores_secret_key_
 # FUNCIÓN DE CONEXIÓN A MYSQL (Detecta si es Vercel/Aiven o Local)
 def get_db():
     if os.getenv('DB_HOST'):
-        # Si estamos en Vercel (leyendo las variables de Aiven)
         return pymysql.connect(
             host=os.getenv('DB_HOST'),
             user=os.getenv('DB_USER', 'avnadmin'),
@@ -24,7 +23,6 @@ def get_db():
             cursorclass=pymysql.cursors.DictCursor
         )
     else:
-        # Si estás en tu compu localmente
         return pymysql.connect(
             host='localhost',
             user='root',
@@ -41,7 +39,7 @@ def index():
 
 @app.route('/api/tutor/registro', methods=['POST'])
 def registrar_tutor():
-    data = request.json
+    data = request.json or {}
     nombre = data.get('nombre')
     email = data.get('email')
     password = data.get('password')
@@ -69,7 +67,7 @@ def registrar_tutor():
 
 @app.route('/api/tutor/login', methods=['POST'])
 def login_tutor():
-    data = request.json
+    data = request.json or {}
     email = data.get('email')
     password = data.get('password')
 
@@ -112,7 +110,7 @@ def alta_nino():
     if 'tutor_id' not in session:
         return jsonify({'success': False, 'msg': 'Acceso denegado.'}), 403
 
-    data = request.json
+    data = request.json or {}
     nombre = data.get('nombre')
     edad = data.get('edad')
     grado = data.get('grado')
@@ -168,7 +166,7 @@ def seleccionar_nino(nino_id):
 
 @app.route('/api/nino/login-qr', methods=['POST'])
 def login_nino_qr():
-    data = request.json
+    data = request.json or {}
     qr_code = data.get('codigo_qr')
 
     conn = get_db()
@@ -198,7 +196,7 @@ def actualizar_estrellas():
     if 'nino_id' not in session:
         return jsonify({'success': False, 'msg': 'No hay sesión de niño activa.'}), 403
 
-    data = request.json
+    data = request.json or {}
     estrellas_ganadas = data.get('estrellas', 0)
 
     conn = get_db()
@@ -206,7 +204,7 @@ def actualizar_estrellas():
         with conn.cursor() as cursor:
             cursor.execute("SELECT estrellas FROM ninos WHERE id = %s", (session['nino_id'],))
             nino = cursor.fetchone()
-            nuevas_estrellas = max(0, nino['estrellas'] + estrellas_ganadas)
+            nuevas_estrellas = max(0, (nino['estrellas'] if nino else 0) + estrellas_ganadas)
             nuevo_nivel = (nuevas_estrellas // 20) + 1
 
             cursor.execute("UPDATE ninos SET estrellas = %s, nivel = %s WHERE id = %s",
@@ -216,5 +214,6 @@ def actualizar_estrellas():
     finally:
         conn.close()
 
-if __name__ == '__main__':
-    app.run(debug=True)
+# Comentado para compatibilidad con Vercel Serverless:
+# if __name__ == '__main__':
+#     app.run(debug=True)

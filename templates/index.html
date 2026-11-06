@@ -144,11 +144,11 @@
                 <p>Información clara, explicaciones interactivas e imágenes educativas.</p>
             </div>
             <div class="tabs-sub">
-                <button class="sub-tab active" onclick="cargarMateria('espanol')">Español</button>
-                <button class="sub-tab" onclick="cargarMateria('ciencias')">Ciencias Naturales</button>
-                <button class="sub-tab" onclick="cargarMateria('geografia')">Geografía</button>
-                <button class="sub-tab" onclick="cargarMateria('historia')">Historia</button>
-                <button class="sub-tab" onclick="cargarMateria('civica')">Formación Cívica y Ética</button>
+                <button class="sub-tab active" id="btn-subtab-espanol" onclick="cargarMateria('espanol')">Español</button>
+                <button class="sub-tab" id="btn-subtab-ciencias" onclick="cargarMateria('ciencias')">Ciencias Naturales</button>
+                <button class="sub-tab" id="btn-subtab-geografia" onclick="cargarMateria('geografia')">Geografía</button>
+                <button class="sub-tab" id="btn-subtab-historia" onclick="cargarMateria('historia')">Historia</button>
+                <button class="sub-tab" id="btn-subtab-civica" onclick="cargarMateria('civica')">Formación Cívica y Ética</button>
             </div>
             <div id="materia-contenido-box" class="subject-card-box"></div>
         </section>
@@ -238,34 +238,35 @@
     <div class="modal-overlay" id="modal-auth">
         <div class="modal-card">
             <button class="modal-close" onclick="cerrarModalAuth()">&times;</button>
+            
             <div id="auth-seccion-tutor">
                 <h3>Portal del Tutor / Padre de Familia</h3>
                 <div class="tabs-sub" style="margin-top:15px;">
-                    <button class="sub-tab active" onclick="verTabAuth('login')">Ingresar</button>
-                    <button class="sub-tab" onclick="verTabAuth('registro')">Registrarse</button>
-                    <button class="sub-tab" onclick="verTabAuth('qr')">Ingreso QR Niño</button>
+                    <button class="sub-tab active" id="tab-auth-login" onclick="verTabAuth('login')">Ingresar</button>
+                    <button class="sub-tab" id="tab-auth-registro" onclick="verTabAuth('registro')">Registrarse</button>
+                    <button class="sub-tab" id="tab-auth-qr" onclick="verTabAuth('qr')">Ingreso QR Niño</button>
                 </div>
 
                 <!-- LOGIN TUTOR -->
                 <form id="form-login-tutor" onsubmit="loginTutor(event)">
-                    <input type="email" id="login-email" class="input-std" placeholder="Correo Electrónico" required>
+                    <input type="email" id="login-email" class="input-std" placeholder="Correo Electrónico" required autocomplete="off">
                     <input type="password" id="login-pwd" class="input-std" placeholder="Contraseña" required>
                     <button type="submit" class="btn-primary block">Entrar al Portal</button>
                 </form>
 
                 <!-- REGISTRO TUTOR -->
                 <form id="form-reg-tutor" class="hidden" onsubmit="registroTutor(event)">
-                    <input type="text" id="reg-nombre" class="input-std" placeholder="Nombre Completo" required>
-                    <input type="email" id="reg-email" class="input-std" placeholder="Correo Electrónico" required>
+                    <input type="text" id="reg-nombre" class="input-std" placeholder="Nombre Completo" required autocomplete="off">
+                    <input type="email" id="reg-email" class="input-std" placeholder="Correo Electrónico" required autocomplete="off">
                     <input type="password" id="reg-pwd" class="input-std" placeholder="Contraseña" required>
-                    <input type="text" id="reg-tel" class="input-std" placeholder="Teléfono de contacto">
+                    <input type="text" id="reg-tel" class="input-std" placeholder="Teléfono de contacto" autocomplete="off">
                     <button type="submit" class="btn-primary block">Crear Cuenta</button>
                 </form>
 
                 <!-- INGRESO POR CÓDIGO QR NIÑO -->
                 <div id="box-login-qr" class="hidden text-center">
                     <p style="margin-bottom:10px;">Ingresa el código único del niño o escanea su credencial QR:</p>
-                    <input type="text" id="qr-code-input" class="input-std" placeholder="Ej. EXPLORADOR-A1B2C3D4">
+                    <input type="text" id="qr-code-input" class="input-std" placeholder="Ej. EXPLORADOR-A1B2C3D4" autocomplete="off">
                     <button class="btn-primary block" onclick="loginNinoQR()">Iniciar Sesión de Niño</button>
                 </div>
             </div>
