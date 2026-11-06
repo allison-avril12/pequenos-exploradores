@@ -191,7 +191,13 @@ def login_nino_qr():
 
 @app.route('/api/nino/generar-qr-imagen/<string:codigo_qr>', methods=['GET'])
 def generar_qr_imagen(codigo_qr):
-    img = qrcode.make(codigo_qr)
+    # Obtiene la URL actual del dominio (funciona local y en Vercel)
+    host_url = request.host_url.rstrip('/')
+    
+    # URL completa que abrirá el celular al escanear
+    url_login_directo = f"{host_url}/?qr_token={codigo_qr}"
+
+    img = qrcode.make(url_login_directo)
     buf = io.BytesIO()
     img.save(buf, format='PNG')
     byte_im = buf.getvalue()
