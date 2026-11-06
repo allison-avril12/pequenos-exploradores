@@ -11,24 +11,25 @@ from werkzeug.security import generate_password_hash, check_password_hash
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'pequenos_exploradores_secret_key_super_segura')
 
-# FUNCIÓN DE CONEXIÓN A MYSQL (Compatibilidad verificada con Aiven + Vercel)
+# FUNCIÓN DE CONEXIÓN A MYSQL (Aiven + Vercel)
 def get_db():
     if os.getenv('DB_HOST'):
-        # Crear contexto SSL flexible compatible con Aiven
+        # Conexión para Vercel / Aiven en Producción
         ssl_ctx = ssl.create_default_context()
         ssl_ctx.check_hostname = False
         ssl_ctx.verify_mode = ssl.CERT_NONE
 
         return pymysql.connect(
-            host=os.getenv('DB_HOST'),
+            host=os.getenv('DB_HOST', 'mysql-16bc4e15-soycecytem-1846.f.aivencloud.com'),
             user=os.getenv('DB_USER', 'avnadmin'),
-            password=os.getenv('DB_PASSWORD'),
+            password=os.getenv('DB_PASSWORD', 'AVNS_IQgCrfI-TRla25i00sF'),
             database=os.getenv('DB_NAME', 'defaultdb'),
             port=int(os.getenv('DB_PORT', 17854)),
             ssl=ssl_ctx,
             cursorclass=pymysql.cursors.DictCursor
         )
     else:
+        # Conexión Local
         return pymysql.connect(
             host='localhost',
             user='root',
@@ -220,6 +221,6 @@ def actualizar_estrellas():
     finally:
         conn.close()
 
-# Comentado para compatibilidad con Vercel Serverless:
+# Comentado para Vercel Serverless:
 # if __name__ == '__main__':
 #     app.run(debug=True)

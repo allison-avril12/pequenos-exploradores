@@ -1,7 +1,6 @@
-CREATE DATABASE IF NOT EXISTS pequenos_exploradores DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-USE pequenos_exploradores;
+USE defaultdb;
 
--- TABLA DE TUTORES / PADRES
+-- 1. TABLA DE TUTORES / PADRES DE FAMILIA
 CREATE TABLE IF NOT EXISTS tutores (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
@@ -11,13 +10,14 @@ CREATE TABLE IF NOT EXISTS tutores (
     fecha_registro DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
+-- 2. TABLA DE NIÑOS / EXPLORADORES
 CREATE TABLE IF NOT EXISTS ninos (
     id INT AUTO_INCREMENT PRIMARY KEY,
     tutor_id INT NOT NULL,
     nombre VARCHAR(100) NOT NULL,
-    edad INT NOT NULL,
-    grado_escolar VARCHAR(50) NOT NULL,
-    genero VARCHAR(20) NOT NULL,
+    edad INT,
+    grado_escolar VARCHAR(50),
+    genero VARCHAR(20),
     estrellas INT DEFAULT 0,
     nivel INT DEFAULT 1,
     codigo_qr VARCHAR(100) NOT NULL UNIQUE,
@@ -26,7 +26,7 @@ CREATE TABLE IF NOT EXISTS ninos (
     FOREIGN KEY (tutor_id) REFERENCES tutores(id) ON DELETE CASCADE
 );
 
--- TABLA DE HÁBITOS Y TAREAS DIARIAS
+-- 3. TABLA DE HÁBITOS Y RETOS DIARIOS
 CREATE TABLE IF NOT EXISTS habitos_nino (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nino_id INT NOT NULL,
@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS habitos_nino (
     UNIQUE KEY uq_habito_dia (nino_id, habito_clave, fecha)
 );
 
--- TABLA DE RECOMPENSAS DESBLOQUEADAS
+-- 4. TABLA DE RECOMPENSAS Y PREMIOS CANJEADOS
 CREATE TABLE IF NOT EXISTS recompensas_nino (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nino_id INT NOT NULL,
@@ -45,3 +45,5 @@ CREATE TABLE IF NOT EXISTS recompensas_nino (
     fecha_desbloqueo DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (nino_id) REFERENCES ninos(id) ON DELETE CASCADE
 );
+
+SHOW TABLES;
