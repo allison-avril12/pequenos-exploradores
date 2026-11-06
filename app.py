@@ -227,6 +227,71 @@ def actualizar_estrellas():
     finally:
         conn.close()
 
+        # 1. Generar QR dinámico para iniciar sesión en la web
+@app.route('/api/qr-login/generar', methods=['GET'])
+def generar_qr_login_sesion():
+    token_sesion = f"LOGIN-{uuid.uuid4().hex[:12].upper()}"
+    conn = get_db()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("INSERT INTO qr_login_sessions (token) VALUES (%s)", (token_sesion,))
+            conn.commit()
+    finally:
+        conn.close()
+
+    host_url = request.host_url.rstrip('/')
+    url_autorizacion = f"{host_url}/?autorizar_qr={token_sesion}"
+
+    img = qrcode.make(url_autorizacion)
+    buf = io.BytesIO()
+    img.save(buf, format='PNG')
+    byte_im = buf.getvalue()
+    base64_src = f"data:image/png;base64,{base64.b64encode(byte_im).decode('utf-8')}"
+
+    return jsonify({'success': True, 'token': token_sesion, 'qr_image': base64_src})
+
+# 2. La computadora consulta si el QR ya fue escaneado (Polling)
+@app.route('/api/qr-login/estado/<string:token>', methods=['GET'])
+def verificar_estado_qr(token):
+    conn = get_db()
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT * FROM qr_login_sessions WHERE token = %s", (token,))
+            res = cursor.fetchone()
+            if res and res['estado'] == 'autorizado':
+                if res['tutor_id']:
+                    session['tutor_id'] = res['tutor_id']
+                    return jsonify({'success': True, 'tipo': 'tutor', 'id': res['tutor_id']})
+                elif res['nino_id']:
+                    session['nino_id'] = res['nino_id']
+                    return jsonify({'success': True, 'tipo': 'nino', 'id': res['nino_id']})
+            return jsonify({'success': False, 'estado': res['estado'] if res else 'no_encontrado'})
+    finally:
+        conn.close()
+
+# 3. El celular abre la URL y autoriza la sesión
+@app.route('/api/qr-login/autorizar', methods=['POST'])
+def autorizar_qr():
+    data = request.json or {}
+    token = data.get('token')
+    
+    if 'tutor_id' not in session and 'nino_id' not in session:
+        return jsonify({'success': False, 'msg': 'Debes tener sesión activa en tu celular para autorizar.'}), 403
+
+    conn = get_db()
+    try:
+        with conn.cursor() as cursor:
+            tutor_id = session.get('tutor_id')
+            nino_id = session.get('nino_id')
+            cursor.execute(
+                "UPDATE qr_login_sessions SET estado = 'autorizado', tutor_id = %s, nino_id = %s WHERE token = %s",
+                (tutor_id, nino_id, token)
+            )
+            conn.commit()
+            return jsonify({'success': True, 'msg': 'Sesión autorizada en la pantalla principal.'})
+    finally:
+        conn.close()
+
 # Comentado para Vercel Serverless:
 # if __name__ == '__main__':
 #     app.run(debug=True)

@@ -440,3 +440,56 @@ async function autoLoginPorQR(code) {
         console.error("Error al iniciar sesión por QR:", err);
     }
 }
+
+let intervalQRCheck = null;
+
+// Solicitar QR de Login estilo Steam para el Portal
+async function solicitarQRSteamLogin() {
+    try {
+        const res = await fetch('/api/qr-login/generar');
+        const data = await res.json();
+        if (data.success) {
+            document.getElementById('pnino-qr-img-box').innerHTML = `<img src="${data.qr_image}" style="max-width:180px;">`;
+            
+            // Iniciar comprobación cada 2 segundos
+            if (intervalQRCheck) clearInterval(intervalQRCheck);
+            intervalQRCheck = setInterval(() => comprobarAutorizacionQR(data.token), 2000);
+        }
+    } catch (err) {
+        console.error("Error al generar el QR estilo Steam:", err);
+    }
+}
+
+// Comprobar si el celular ya escaneó y autorizó
+async function comprobarAutorizacionQR(token) {
+    try {
+        const res = await fetch(`/api/qr-login/estado/${token}`);
+        const data = await res.json();
+        if (data.success) {
+            clearInterval(intervalQRCheck);
+            alert("¡Sesión iniciada con éxito mediante QR!");
+            location.reload();
+        }
+    } catch (err) {
+        console.error(err);
+    }
+}
+
+// Detectar si el celular abrió el enlace de autorizar
+document.addEventListener("DOMContentLoaded", () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const autorizarToken = urlParams.get('autorizar_qr');
+
+    if (autorizarToken) {
+        fetch('/api/qr-login/autorizar', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ token: autorizarToken })
+        })
+        .then(res => res.json())
+        .then(data => {
+            alert(data.msg);
+            window.history.replaceState({}, document.title, window.location.pathname);
+        });
+    }
+});
