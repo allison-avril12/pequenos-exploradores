@@ -10,6 +10,7 @@ let estadoUsuario = {
 };
 
 let juegoMate = { n1: 0, n2: 0, op: '+', resp: 0 };
+let intervalQRCheck = null;
 
 const materiasData = {
     espanol: {
@@ -54,12 +55,120 @@ const valoresLista = [
     { titulo: "La Responsabilidad", desc: "Cumplir tus compromisos y tareas con esmero.", tip: "Termina tus deberes escolares antes de ir a jugar." }
 ];
 
+// ----------------- INICIALIZACIÓN UNIFICADA DE LA APLICACIÓN -----------------
 document.addEventListener("DOMContentLoaded", () => {
     cargarMateria('espanol');
     renderizarValores();
     renderizarLecturas();
     renderizarRecompensas();
+
+    // LEER PARÁMETROS DE LA URL AL ESCANEAR UN CÓDIGO QR
+    const urlParams = new URLSearchParams(window.location.search);
+    const qrToken = urlParams.get('qr_token');
+    const autorizarToken = urlParams.get('autorizar_qr');
+
+    if (qrToken) {
+        autoLoginPorQR(qrToken);
+    } else if (autorizarToken) {
+        procesarAutorizacionSteam(autorizarToken);
+    }
 });
+
+// ----------------- AUTENTICACIÓN AUTOMÁTICA POR CÓDIGO QR -----------------
+
+// 1. Iniciar sesión directamente al escanear la credencial de un niño
+async function autoLoginPorQR(code) {
+    try {
+        const res = await fetch('/api/nino/login-qr', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ codigo_qr: code })
+        });
+        const data = await res.json();
+        if (data.success) {
+            actualizarEstadoNiñoGlobal(data.nino);
+            mostrarPantalla('inicio');
+            alert(`¡Bienvenido de nuevo, ${data.nino.nombre}! 🚀`);
+            window.history.replaceState({}, document.title, window.location.pathname);
+        } else {
+            alert(data.msg || "Código QR no válido o perfil no encontrado.");
+        }
+    } catch (err) {
+        console.error("Error al iniciar sesión por QR:", err);
+    }
+}
+
+// 2. Procesar autorización estilo Steam cuando el celular escanea la pantalla de la PC
+async function procesarAutorizacionSteam(token) {
+    try {
+        const res = await fetch('/api/qr-login/autorizar', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ token: token })
+        });
+        const data = await res.json();
+        if (data.success) {
+            alert(data.msg || "¡Sesión autorizada en la computadora!");
+        } else {
+            alert(data.msg || "Debes iniciar sesión como tutor primero en este celular.");
+        }
+        window.history.replaceState({}, document.title, window.location.pathname);
+    } catch (err) {
+        console.error("Error al autorizar QR:", err);
+    }
+}
+
+// 3. Comprobar periódicamente en la computadora si el celular ya autorizó el QR (Polling)
+async function comprobarAutorizacionQR(token) {
+    try {
+        const res = await fetch(`/api/qr-login/estado/${token}`);
+        const data = await res.json();
+        if (data.success) {
+            clearInterval(intervalQRCheck);
+            alert("¡Sesión iniciada con éxito mediante QR!");
+            location.reload();
+        }
+    } catch (err) {
+        console.error("Error comprobando estado del QR:", err);
+    }
+}
+
+// 4. Generar el QR de inicio estilo Steam en la pantalla de la computadora
+async function solicitarQRSteamLogin() {
+    try {
+        const res = await fetch('/api/qr-login/generar');
+        const data = await res.json();
+        if (data.success) {
+            const box = document.getElementById('pnino-qr-img-box');
+            if (box) {
+                box.innerHTML = `<img src="${data.qr_image}" style="max-width:180px; border-radius:8px;">`;
+            }
+            if (intervalQRCheck) clearInterval(intervalQRCheck);
+            intervalQRCheck = setInterval(() => comprobarAutorizacionQR(data.token), 2000);
+        }
+    } catch (err) {
+        console.error("Error al generar el QR estilo Steam:", err);
+    }
+}
+
+// ----------------- ACTUALIZACIÓN DE ESTADO Y VISTAS -----------------
+function actualizarEstadoNiñoGlobal(nino) {
+    estadoUsuario.nino_id = nino.id;
+    estadoUsuario.nombre = nino.nombre;
+    estadoUsuario.edad = nino.edad;
+    estadoUsuario.grado = nino.grado_escolar;
+    estadoUsuario.genero = nino.genero;
+    estadoUsuario.codigo_qr = nino.codigo_qr;
+    estadoUsuario.estrellas = nino.estrellas;
+    estadoUsuario.nivel = nino.nivel;
+
+    document.getElementById('nombre-nino-activo').textContent = nino.nombre;
+    document.getElementById('contador-estrellas').textContent = nino.estrellas;
+    document.getElementById('nivel-usuario').textContent = `Nivel ${nino.nivel}`;
+    
+    const lblSesion = document.getElementById('lbl-sesion');
+    if (lblSesion) lblSesion.textContent = `Explorador: ${nino.nombre}`;
+}
 
 function mostrarPantalla(id) {
     document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
@@ -168,8 +277,7 @@ function canjearPremios(costo) {
     }
 }
 
-// ---------------- RETOS MATEMÁTICOS ----------------
-
+// ----------------- RETOS MATEMÁTICOS -----------------
 function iniciarJuegoMate(modo) {
     document.getElementById('arena-mate').classList.remove('hidden');
     juegoMate.n1 = Math.floor(Math.random() * 10) + 1;
@@ -203,8 +311,7 @@ function verificarRespuestaMate() {
     }
 }
 
-// ---------------- AUTENTICACIÓN Y ABCM ----------------
-
+// ----------------- AUTENTICACIÓN Y ABCM TUTOR -----------------
 function abrirModalAuth() { document.getElementById('modal-auth').classList.add('active'); }
 function cerrarModalAuth() { document.getElementById('modal-auth').classList.remove('active'); }
 
@@ -336,19 +443,7 @@ async function seleccionarNinoSesion(id) {
         const data = await res.json();
         
         if (data.success) {
-            estadoUsuario.nino_id = data.nino.id;
-            estadoUsuario.nombre = data.nino.nombre;
-            estadoUsuario.edad = data.nino.edad;
-            estadoUsuario.grado = data.nino.grado_escolar;
-            estadoUsuario.genero = data.nino.genero;
-            estadoUsuario.codigo_qr = data.nino.codigo_qr;
-            estadoUsuario.estrellas = data.nino.estrellas;
-            estadoUsuario.nivel = data.nino.nivel;
-
-            document.getElementById('nombre-nino-activo').textContent = data.nino.nombre;
-            document.getElementById('contador-estrellas').textContent = data.nino.estrellas;
-            document.getElementById('nivel-usuario').textContent = `Nivel ${data.nino.nivel}`;
-            
+            actualizarEstadoNiñoGlobal(data.nino);
             cerrarModalAuth();
             mostrarPantalla('inicio');
             alert(`¡Sesión iniciada como ${data.nino.nombre}! 🎉`);
@@ -366,17 +461,7 @@ async function loginNinoQR() {
         alert("Por favor ingresa un código QR.");
         return;
     }
-    const res = await fetch('/api/nino/login-qr', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ codigo_qr: code })
-    });
-    const data = await res.json();
-    if(data.success) {
-        seleccionarNinoSesion(data.nino.id);
-    } else {
-        alert(data.msg || "Código QR no encontrado.");
-    }
+    autoLoginPorQR(code);
 }
 
 async function actualizarVistaPerfilNino() {
@@ -404,92 +489,3 @@ function cerrarSesionTutor() {
     fetch('/api/logout', { method: 'POST' });
     location.reload();
 }
-
-document.addEventListener("DOMContentLoaded", () => {
-    cargarMateria('espanol');
-    renderizarValores();
-    renderizarLecturas();
-    renderizarRecompensas();
-
-    // ---- DETECCIÓN Y AUTOLOGIN POR QR ESCANEADO ----
-    const urlParams = new URLSearchParams(window.location.search);
-    const qrToken = urlParams.get('qr_token');
-
-    if (qrToken) {
-        autoLoginPorQR(qrToken);
-    }
-});
-
-// Función para procesar el login automático desde la URL
-async function autoLoginPorQR(code) {
-    try {
-        const res = await fetch('/api/nino/login-qr', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ codigo_qr: code })
-        });
-        const data = await res.json();
-        if (data.success) {
-            seleccionarNinoSesion(data.nino.id);
-            // Limpia el token de la URL sin recargar la página
-            window.history.replaceState({}, document.title, window.location.pathname);
-        } else {
-            alert("Código QR no válido o expirado.");
-        }
-    } catch (err) {
-        console.error("Error al iniciar sesión por QR:", err);
-    }
-}
-
-let intervalQRCheck = null;
-
-// Solicitar QR de Login estilo Steam para el Portal
-async function solicitarQRSteamLogin() {
-    try {
-        const res = await fetch('/api/qr-login/generar');
-        const data = await res.json();
-        if (data.success) {
-            document.getElementById('pnino-qr-img-box').innerHTML = `<img src="${data.qr_image}" style="max-width:180px;">`;
-            
-            // Iniciar comprobación cada 2 segundos
-            if (intervalQRCheck) clearInterval(intervalQRCheck);
-            intervalQRCheck = setInterval(() => comprobarAutorizacionQR(data.token), 2000);
-        }
-    } catch (err) {
-        console.error("Error al generar el QR estilo Steam:", err);
-    }
-}
-
-// Comprobar si el celular ya escaneó y autorizó
-async function comprobarAutorizacionQR(token) {
-    try {
-        const res = await fetch(`/api/qr-login/estado/${token}`);
-        const data = await res.json();
-        if (data.success) {
-            clearInterval(intervalQRCheck);
-            alert("¡Sesión iniciada con éxito mediante QR!");
-            location.reload();
-        }
-    } catch (err) {
-        console.error(err);
-    }
-}
-
-// Detectar si el celular abrió el enlace de autorizar
-document.addEventListener("DOMContentLoaded", () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const autorizarToken = urlParams.get('autorizar_qr');
-
-    if (autorizarToken) {
-        fetch('/api/qr-login/autorizar', {
-            method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ token: autorizarToken })
-        })
-        .then(res => res.json())
-        .then(data => {
-            alert(data.msg);
-            window.history.replaceState({}, document.title, window.location.pathname);
-        });
-    }
-});
