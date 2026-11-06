@@ -1,39 +1,37 @@
 import os
-from flask import Flask, render_template, request, jsonify, session
-from werkzeug.security import generate_password_hash, check_password_hash
-import pymysql
-import qrcode
 import io
 import base64
 import uuid
+import qrcode
+import pymysql
+from flask import Flask, render_template, request, jsonify, session
+from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
-# Usa una variable de entorno para la secret key si existe, o un fallback
 app.secret_key = os.environ.get('SECRET_KEY', 'pequenos_exploradores_secret_key_super_segura')
 
-# CONFIGURACIÓN DINÁMICA DE CONEXIÓN A MYSQL (Aiven / Local)
-MYSQL_HOST = os.environ.get('DB_HOST', 'localhost')
-MYSQL_USER = os.environ.get('DB_USER', 'root')
-MYSQL_PASSWORD = os.environ.get('DB_PASSWORD', 'Deluna182809')
-MYSQL_DB = os.environ.get('DB_NAME', 'pequenos_exploradores')
-MYSQL_PORT = int(os.environ.get('DB_PORT', 3306))
-MYSQL_SSL = os.environ.get('DB_SSL', None)
-
+# FUNCIÓN DE CONEXIÓN A MYSQL (Detecta si es Vercel/Aiven o Local)
 def get_db():
-    ssl_config = None
-    # Si la variable DB_SSL está presente (como en Aiven), se habilita SSL
-    if MYSQL_SSL and MYSQL_SSL.upper() == 'REQUIRED':
-        ssl_config = {'ssl': {}}
-
-    return pymysql.connect(
-        host=MYSQL_HOST,
-        user=MYSQL_USER,
-        password=MYSQL_PASSWORD,
-        database=MYSQL_DB,
-        port=MYSQL_PORT,
-        ssl=ssl_config['ssl'] if ssl_config else None,
-        cursorclass=pymysql.cursors.DictCursor
-    )
+    if os.getenv('DB_HOST'):
+        # Si estamos en Vercel (leyendo las variables de Aiven)
+        return pymysql.connect(
+            host=os.getenv('DB_HOST'),
+            user=os.getenv('DB_USER', 'avnadmin'),
+            password=os.getenv('DB_PASSWORD'),
+            database=os.getenv('DB_NAME', 'defaultdb'),
+            port=int(os.getenv('DB_PORT', 17854)),
+            ssl={"fake_flag_to_enable_ssl": True},
+            cursorclass=pymysql.cursors.DictCursor
+        )
+    else:
+        # Si estás en tu compu localmente
+        return pymysql.connect(
+            host='localhost',
+            user='root',
+            password='Deluna182809',
+            database='pequenos_exploradores',
+            cursorclass=pymysql.cursors.DictCursor
+        )
 
 # ----------------- RUTAS DE VISTA Y AUTENTICACIÓN TUTOR -----------------
 
@@ -93,7 +91,7 @@ def logout():
     session.clear()
     return jsonify({'success': True})
 
-# ----------------- ABCM DE NIÑOS (PRIVACIDAD GARANTIZADA) -----------------
+# ----------------- ABCM DE NIÑOS -----------------
 
 @app.route('/api/ninos', methods=['GET'])
 def listar_ninos():
@@ -219,5 +217,4 @@ def actualizar_estrellas():
         conn.close()
 
 if __name__ == '__main__':
-    print("Servidor corriendo en http://127.0.0.1:5000")
-    app.run(debug=True, port=5000)
+    app.run(debug=True)
