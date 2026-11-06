@@ -1,3 +1,4 @@
+import os
 from flask import Flask, render_template, request, jsonify, session
 from werkzeug.security import generate_password_hash, check_password_hash
 import pymysql
@@ -7,20 +8,30 @@ import base64
 import uuid
 
 app = Flask(__name__)
-app.secret_key = 'pequenos_exploradores_secret_key_super_segura'
+# Usa una variable de entorno para la secret key si existe, o un fallback
+app.secret_key = os.environ.get('SECRET_KEY', 'pequenos_exploradores_secret_key_super_segura')
 
-# CONFIGURACIÓN DE CONEXIÓN A MYSQL
-MYSQL_HOST = 'localhost'
-MYSQL_USER = 'root'
-MYSQL_PASSWORD = 'Deluna182809'  # Si tu MySQL tiene contraseña, ponla aquí
-MYSQL_DB = 'pequenos_exploradores'
+# CONFIGURACIÓN DINÁMICA DE CONEXIÓN A MYSQL (Aiven / Local)
+MYSQL_HOST = os.environ.get('DB_HOST', 'localhost')
+MYSQL_USER = os.environ.get('DB_USER', 'root')
+MYSQL_PASSWORD = os.environ.get('DB_PASSWORD', 'Deluna182809')
+MYSQL_DB = os.environ.get('DB_NAME', 'pequenos_exploradores')
+MYSQL_PORT = int(os.environ.get('DB_PORT', 3306))
+MYSQL_SSL = os.environ.get('DB_SSL', None)
 
 def get_db():
+    ssl_config = None
+    # Si la variable DB_SSL está presente (como en Aiven), se habilita SSL
+    if MYSQL_SSL and MYSQL_SSL.upper() == 'REQUIRED':
+        ssl_config = {'ssl': {}}
+
     return pymysql.connect(
         host=MYSQL_HOST,
         user=MYSQL_USER,
         password=MYSQL_PASSWORD,
         database=MYSQL_DB,
+        port=MYSQL_PORT,
+        ssl=ssl_config['ssl'] if ssl_config else None,
         cursorclass=pymysql.cursors.DictCursor
     )
 
