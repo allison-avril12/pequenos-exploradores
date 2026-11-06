@@ -104,3 +104,151 @@ body { background: var(--bg-color); color: var(--text-main); padding-bottom: 90p
 .math-menu { display: flex; gap: 10px; flex-wrap: wrap; }
 .math-mode-btn { background: var(--card-bg); border: 2px solid var(--warning); padding: 10px 20px; border-radius: 12px; font-weight: 700; color: #856404; cursor: pointer; }
 .quiz-box { background: var(--card-bg); padding: 25px; border-radius: var(--radius); box-shadow: var(--shadow); text-align: center; }
+
+/* ==========================================================================
+   ESTILOS RESPONSIVOS PARA CELULARES Y TABLETS
+   ========================================================================== */
+
+/* 1. Ajustes para Tablets y pantallas medianas (máximo 768px) */
+@media screen and (max-width: 768px) {
+    .navbar {
+        padding: 10px 15px;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .logo-container h1 {
+        font-size: 1.2rem;
+    }
+
+    .user-stats {
+        gap: 8px;
+    }
+
+    .stat-badge {
+        padding: 4px 10px;
+        font-size: 0.85rem;
+    }
+
+    .btn-auth-header span {
+        display: none; /* Oculta el texto largo en header para ahorrar espacio */
+    }
+
+    .main-container {
+        padding: 15px 10px 80px 10px;
+    }
+
+    .welcome-banner {
+        flex-direction: column;
+        text-align: center;
+        padding: 20px 15px;
+    }
+
+    .welcome-illustration {
+        margin-top: 15px;
+    }
+
+    .modules-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    .child-profile-card {
+        flex-direction: column;
+        text-align: center;
+        padding: 15px;
+    }
+
+    .stats-row {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .stat-box {
+        min-width: 80px;
+        padding: 8px;
+    }
+
+    .bottom-nav {
+        padding: 6px 4px;
+        overflow-x: auto;
+        justify-content: space-around;
+    }
+
+    .nav-item {
+        font-size: 0.75rem;
+        padding: 4px 6px;
+        min-width: 55px;
+    }
+
+    .nav-item i {
+        font-size: 1.1rem;
+        margin-bottom: 2px;
+    }
+
+    .tabs-sub {
+        display: flex;
+        overflow-x: auto;
+        white-space: nowrap;
+        padding-bottom: 5px;
+        gap: 6px;
+    }
+
+    .sub-tab {
+        flex: 0 0 auto;
+        font-size: 0.85rem;
+        padding: 8px 14px;
+    }
+
+    .modal-card {
+        width: 92%;
+        padding: 20px 15px;
+        margin: 10px;
+    }
+}
+
+/* 2. Ajustes específicos para Celulares pequeños (máximo 480px) */
+@media screen and (max-width: 480px) {
+    .logo-container h1 {
+        font-size: 1.05rem;
+    }
+
+    .modules-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .math-menu {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    .math-mode-btn {
+        width: 100%;
+        padding: 10px 5px;
+        font-size: 0.85rem;
+    }
+
+    .habit-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .habit-item button {
+        width: 100%;
+    }
+
+    .rewards-grid, .values-grid, .articles-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .qr-container-box {
+        padding: 12px;
+    }
+
+    .qr-image-holder img {
+        max-width: 120px !important;
+    }
+}
