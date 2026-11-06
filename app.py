@@ -4,22 +4,28 @@ import base64
 import uuid
 import qrcode
 import pymysql
+import ssl
 from flask import Flask, render_template, request, jsonify, session
 from werkzeug.security import generate_password_hash, check_password_hash
 
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', 'pequenos_exploradores_secret_key_super_segura')
 
-# FUNCIÓN DE CONEXIÓN A MYSQL (Detecta si es Vercel/Aiven o Local)
+# FUNCIÓN DE CONEXIÓN A MYSQL (Compatibilidad verificada con Aiven + Vercel)
 def get_db():
     if os.getenv('DB_HOST'):
+        # Crear contexto SSL flexible compatible con Aiven
+        ssl_ctx = ssl.create_default_context()
+        ssl_ctx.check_hostname = False
+        ssl_ctx.verify_mode = ssl.CERT_NONE
+
         return pymysql.connect(
             host=os.getenv('DB_HOST'),
             user=os.getenv('DB_USER', 'avnadmin'),
             password=os.getenv('DB_PASSWORD'),
             database=os.getenv('DB_NAME', 'defaultdb'),
             port=int(os.getenv('DB_PORT', 17854)),
-            ssl={"fake_flag_to_enable_ssl": True},
+            ssl=ssl_ctx,
             cursorclass=pymysql.cursors.DictCursor
         )
     else:
