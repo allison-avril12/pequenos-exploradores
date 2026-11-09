@@ -43,7 +43,7 @@ const lecturasLargas = [
     {
         id: 1,
         titulo: "El Viaje del Pequeño Colibrí y el Secreto del Bosque",
-        texto: "Había una vez en un frondoso bosque un pequeño colibrí llamado Tito. Tito era famoso porque sus alas brillaban con hermosos tonos esmeralda. Un verano caluroso, el arroyo principal del bosque comenzó a secarse rápidamente. Los animales estaban muy preocupados. Tito no se rindió y voló hacia la cima de la montaña más alta para pedir ayuda a las nubes. Con amabilidad, respeto y perseverancia, les explicó la situación. Las nubes, conmocionadas por la dedicación de Tito, volaron hacia el valle y dejaron caer una suave lluvia fresca que llenó de nuevo el arroyo, salvando a todo el bosque.",
+        texto: "Había una vez en un frondoso bosque un pequeño colibrí llamado Tito. Tito era famoso porque sus alas brillaban con hermosos tonos esmeralda. Un verano caluroso, el arroyo principal del bosque comenzó a secarse rápidamente. Los animales estaban muy preocupados. Tito no se rendió y voló hacia la cima de la montaña más alta para pedir ayuda a las nubes. Con amabilidad, respeto y perseverancia, les explicó la situación. Las nubes, conmocionadas por la dedicación de Tito, volaron hacia el valle y dejaron caer una suave lluvia fresca que llenó de nuevo el arroyo, salvando a todo el bosque.",
     }
 ];
 
@@ -61,7 +61,6 @@ document.addEventListener("DOMContentLoaded", () => {
     renderizarLecturas();
     renderizarRecompensas();
 
-    // COMPROBAR SI SE ESCANEO EL QR DEL CARNET PARA VER LA FICHA PÚBLICA
     const urlParams = new URLSearchParams(window.location.search);
     const verFichaToken = urlParams.get('ver_ficha');
 
@@ -130,7 +129,7 @@ function mostrarPantalla(id) {
     }
 }
 
-// RENDERIZADO DETALLADO DE MATERIAS (INCLUYE ORTOGRAFÍA, GRAMÁTICA Y ACENTUACIÓN DE LAS IMÁGENES)
+// RENDERIZADO DETALLADO DE MATERIAS
 function cargarMateria(clave) {
     document.querySelectorAll('.sub-tab').forEach(btn => btn.classList.remove('active'));
     const activeSubTab = document.getElementById(`btn-subtab-${clave}`);
@@ -171,7 +170,6 @@ function cargarMateria(clave) {
 
                 <h3>✏️ Ejercicios Prácticos Interactivos</h3>
                 
-                <!-- 1. Encuentra el error -->
                 <div style="background:#f9f9f9; padding:15px; border-radius:10px; margin-bottom:15px;">
                     <h4>1. Encuentra el error (Corrige la palabra)</h4>
                     <p>Corrige la palabra: <strong>Arvol</strong></p>
@@ -180,7 +178,6 @@ function cargarMateria(clave) {
                     <span id="fb-error-1" style="margin-left:10px; font-weight:bold;"></span>
                 </div>
 
-                <!-- 2. Identifica el sujeto y predicado -->
                 <div style="background:#f9f9f9; padding:15px; border-radius:10px; margin-bottom:15px;">
                     <h4>2. Identifica el sujeto y predicado</h4>
                     <p>Oración: <em>"El perro corre en el parque."</em></p>
@@ -190,7 +187,6 @@ function cargarMateria(clave) {
                     <span id="fb-sujeto-1" style="margin-left:10px; font-weight:bold;"></span>
                 </div>
 
-                <!-- 3. Coloca las tildes -->
                 <div style="background:#f9f9f9; padding:15px; border-radius:10px; margin-bottom:15px;">
                     <h4>3. Coloca las tildes</h4>
                     <p>Escribe correctamente con tilde: <strong>Cancion</strong></p>
@@ -199,7 +195,6 @@ function cargarMateria(clave) {
                     <span id="fb-tilde-1" style="margin-left:10px; font-weight:bold;"></span>
                 </div>
 
-                <!-- 4. Ordena las palabras -->
                 <div style="background:#f9f9f9; padding:15px; border-radius:10px; margin-bottom:15px;">
                     <h4>4. Ordena las palabras</h4>
                     <p>Palabras desordenadas: <strong>juega / parque / El / niño / en / el.</strong></p>
@@ -208,7 +203,6 @@ function cargarMateria(clave) {
                     <span id="fb-ordena-1" style="margin-left:10px; font-weight:bold;"></span>
                 </div>
 
-                <!-- 5. Clasifica las palabras -->
                 <div style="background:#f9f9f9; padding:15px; border-radius:10px; margin-bottom:15px;">
                     <h4>5. Clasifica las palabras (Agudas, Graves, Esdrújulas)</h4>
                     <table style="width:100%; border-collapse:collapse; background:#fff; text-align:center;">
@@ -228,7 +222,6 @@ function cargarMateria(clave) {
                     <span id="fb-clasif-1" style="margin-left:10px; font-weight:bold;"></span>
                 </div>
 
-                <!-- Otras actividades creativas -->
                 <div style="background:#eef6ff; padding:15px; border-radius:10px; margin-top:15px;">
                     <h4>🎨 Otras actividades creativas recomendadas</h4>
                     <ul style="margin-left:20px; line-height:1.8;">
@@ -242,18 +235,191 @@ function cargarMateria(clave) {
                 </div>
             </div>
         `;
-    } else {
+    } else if (clave === 'ciencias') {
         box.innerHTML = `
             <div class="subject-card">
                 <h3><i class="fa-solid ${data.icono}"></i> ${data.titulo}</h3>
                 <p>${data.desc}</p>
-                <button class="btn-primary" style="margin-top: 15px;" onclick="sumarEstrellas(2)">Completar Módulo (+2 ⭐)</button>
+                <hr style="margin:15px 0;">
+
+                <h4>📋 Plan de Aprendizaje: Ciencias Naturales</h4>
+                <div style="overflow-x:auto; margin-bottom:20px;">
+                    <table style="width:100%; border-collapse:collapse; background:#fff; border-radius:8px; overflow:hidden;">
+                        <thead style="background:#27AE60; color:white;">
+                            <tr>
+                                <th style="padding:10px; text-align:left;">Eje Temático</th>
+                                <th style="padding:10px; text-align:left;">Actividad Principal</th>
+                                <th style="padding:10px; text-align:left;">Objetivo Educativo</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="border-bottom:1px solid #eee;"><td style="padding:8px;">El Cuerpo Humano</td><td style="padding:8px;">El Mapa de los Órganos</td><td style="padding:8px;">Relacionar corazón, pulmones y estómago con su función básica.</td></tr>
+                            <tr style="border-bottom:1px solid #eee;"><td style="padding:8px;">Nutrición</td><td style="padding:8px;">Plato del Bien Comer</td><td style="padding:8px;">Clasificar frutas, verduras, cereales y proteínas.</td></tr>
+                            <tr style="border-bottom:1px solid #eee;"><td style="padding:8px;">Ecosistemas</td><td style="padding:8px;">Hábitats del Mundo</td><td style="padding:8px;">Identificar animales acuáticos, terrestres y aéreos.</td></tr>
+                            <tr><td style="padding:8px;">El Agua</td><td style="padding:8px;">El Ciclo del Agua</td><td style="padding:8px;">Reconocer Evaporación, Condensación y Precipitación.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>🔬 Retos e Investigaciones Interactivas</h3>
+
+                <div style="background:#f9f9f9; padding:15px; border-radius:10px; margin-bottom:15px;">
+                    <h4>1. ¿Cuál es la función principal del Corazón?</h4>
+                    <select id="inp-cn-1" class="input-std" style="max-width:320px;">
+                        <option value="">Selecciona la opción correcta...</option>
+                        <option value="a">Digerir la comida que consumimos</option>
+                        <option value="b">Bombear sangre a todo nuestro cuerpo</option>
+                        <option value="c">Filtrar el aire que respiramos</option>
+                    </select>
+                    <button class="btn-primary" onclick="validarEjercicio('inp-cn-1', 'b', 'fb-cn-1', 2)">Comprobar</button>
+                    <span id="fb-cn-1" style="margin-left:10px; font-weight:bold;"></span>
+                </div>
+
+                <div style="background:#f9f9f9; padding:15px; border-radius:10px; margin-bottom:15px;">
+                    <h4>2. El Ciclo del Agua</h4>
+                    <p>Cuando el agua del mar se calienta con el Sol y sube en forma de vapor a la atmósfera, el proceso se llama:</p>
+                    <input type="text" id="inp-cn-2" class="input-std" placeholder="Ej. Evaporación" style="max-width:250px;">
+                    <button class="btn-primary" onclick="validarEjercicio('inp-cn-2', 'Evaporación', 'fb-cn-2', 2)">Comprobar</button>
+                    <span id="fb-cn-2" style="margin-left:10px; font-weight:bold;"></span>
+                </div>
+            </div>
+        `;
+    } else if (clave === 'geografia') {
+        box.innerHTML = `
+            <div class="subject-card">
+                <h3><i class="fa-solid ${data.icono}"></i> ${data.titulo}</h3>
+                <p>${data.desc}</p>
+                <hr style="margin:15px 0;">
+
+                <h4>🗺️ Exploración Geográfica de México y el Mundo</h4>
+                <div style="overflow-x:auto; margin-bottom:20px;">
+                    <table style="width:100%; border-collapse:collapse; background:#fff; border-radius:8px; overflow:hidden;">
+                        <thead style="background:#2980B9; color:white;">
+                            <tr>
+                                <th style="padding:10px; text-align:left;">Bloque</th>
+                                <th style="padding:10px; text-align:left;">Desafío</th>
+                                <th style="padding:10px; text-align:left;">Aprendizaje Esperado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="border-bottom:1px solid #eee;"><td style="padding:8px;">Orientación</td><td style="padding:8px;">La Rosa de los Vientos</td><td style="padding:8px;">Ubicación de los 4 puntos cardinales (Norte, Sur, Este, Oeste).</td></tr>
+                            <tr style="border-bottom:1px solid #eee;"><td style="padding:8px;">México</td><td style="padding:8px;">Estados y Capitales</td><td style="padding:8px;">Identificar entidades federativas y sus cabeceras.</td></tr>
+                            <tr><td style="padding:8px;">Continentes</td><td style="padding:8px;">Mapa Mundi</td><td style="padding:8px;">Reconocer los océanos y los 6 continentes del planeta.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>🧭 Trivia Geográfica</h3>
+
+                <div style="background:#f9f9f9; padding:15px; border-radius:10px; margin-bottom:15px;">
+                    <h4>1. ¿Cuál es la capital del Estado de Jalisco en México?</h4>
+                    <input type="text" id="inp-geo-1" class="input-std" placeholder="Escribe la capital" style="max-width:250px;">
+                    <button class="btn-primary" onclick="validarEjercicio('inp-geo-1', 'Guadalajara', 'fb-geo-1', 2)">Comprobar</button>
+                    <span id="fb-geo-1" style="margin-left:10px; font-weight:bold;"></span>
+                </div>
+
+                <div style="background:#f9f9f9; padding:15px; border-radius:10px; margin-bottom:15px;">
+                    <h4>2. Puntos Cardinales</h4>
+                    <p>Si miras por dónde sale el Sol por las mañanas, estás mirando hacia el:</p>
+                    <select id="inp-geo-2" class="input-std" style="max-width:200px;">
+                        <option value="">Selecciona...</option>
+                        <option value="Norte">Norte</option>
+                        <option value="Sur">Sur</option>
+                        <option value="Este">Este</option>
+                        <option value="Oeste">Oeste</option>
+                    </select>
+                    <button class="btn-primary" onclick="validarEjercicio('inp-geo-2', 'Este', 'fb-geo-2', 2)">Comprobar</button>
+                    <span id="fb-geo-2" style="margin-left:10px; font-weight:bold;"></span>
+                </div>
+            </div>
+        `;
+    } else if (clave === 'historia') {
+        box.innerHTML = `
+            <div class="subject-card">
+                <h3><i class="fa-solid ${data.icono}"></i> ${data.titulo}</h3>
+                <p>${data.desc}</p>
+                <hr style="margin:15px 0;">
+
+                <h4>📜 Línea del Tiempo de la Historia de México</h4>
+                <div style="overflow-x:auto; margin-bottom:20px;">
+                    <table style="width:100%; border-collapse:collapse; background:#fff; border-radius:8px; overflow:hidden;">
+                        <thead style="background:#8E44AD; color:white;">
+                            <tr>
+                                <th style="padding:10px; text-align:left;">Época</th>
+                                <th style="padding:10px; text-align:left;">Personajes / Hechos</th>
+                                <th style="padding:10px; text-align:left;">Actividad Práctica</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="border-bottom:1px solid #eee;"><td style="padding:8px;">Prehispánica</td><td style="padding:8px;">Mayas, Aztecas y Olmecas</td><td style="padding:8px;">Asociación de pirámides y zonas arqueológicas.</td></tr>
+                            <tr style="border-bottom:1px solid #eee;"><td style="padding:8px;">Independencia (1810)</td><td style="padding:8px;">Miguel Hidalgo y Josefa Ortiz</td><td style="padding:8px;">Identificación de los héroes de la patria.</td></tr>
+                            <tr><td style="padding:8px;">Revolución (1910)</td><td style="padding:8px;">Francisco I. Madero y Emiliano Zapata</td><td style="padding:8px;">Ordenamiento cronológico de batallas y documentos.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>🏛️ Cuestionario Histórico</h3>
+
+                <div style="background:#f9f9f9; padding:15px; border-radius:10px; margin-bottom:15px;">
+                    <h4>1. ¿En qué año inició la Independencia de México encabezada por Miguel Hidalgo?</h4>
+                    <input type="number" id="inp-his-1" class="input-std" placeholder="Año (Ej. 1810)" style="max-width:200px;">
+                    <button class="btn-primary" onclick="validarEjercicio('inp-his-1', '1810', 'fb-his-1', 2)">Comprobar</button>
+                    <span id="fb-his-1" style="margin-left:10px; font-weight:bold;"></span>
+                </div>
+
+                <div style="background:#f9f9f9; padding:15px; border-radius:10px; margin-bottom:15px;">
+                    <h4>2. Cultura Prehispánica</h4>
+                    <p>¿Qué gran civilización construyó la ciudad de Tenochtitlan sobre el lago de Texcoco?</p>
+                    <input type="text" id="inp-his-2" class="input-std" placeholder="Ej. Azteca o Mexica" style="max-width:250px;">
+                    <button class="btn-primary" onclick="validarEjercicio('inp-his-2', 'Azteca', 'fb-his-2', 2)">Comprobar</button>
+                    <span id="fb-his-2" style="margin-left:10px; font-weight:bold;"></span>
+                </div>
+            </div>
+        `;
+    } else if (clave === 'civica') {
+        box.innerHTML = `
+            <div class="subject-card">
+                <h3><i class="fa-solid ${data.icono}"></i> ${data.titulo}</h3>
+                <p>${data.desc}</p>
+                <hr style="margin:15px 0;">
+
+                <h4>⚖️ Formación Cívica y Convivencia Escolar</h4>
+                <div style="overflow-x:auto; margin-bottom:20px;">
+                    <table style="width:100%; border-collapse:collapse; background:#fff; border-radius:8px; overflow:hidden;">
+                        <thead style="background:#D35400; color:white;">
+                            <tr>
+                                <th style="padding:10px; text-align:left;">Área de Aprendizaje</th>
+                                <th style="padding:10px; text-align:left;">Tema</th>
+                                <th style="padding:10px; text-align:left;">Simulación</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="border-bottom:1px solid #eee;"><td style="padding:8px;">Derechos Fundamentales</td><td style="padding:8px;">Los Derechos de la Niñez</td><td style="padding:8px;">Identificar el derecho a la salud, educación y juego.</td></tr>
+                            <tr style="border-bottom:1px solid #eee;"><td style="padding:8px;">Cultura de Paz</td><td style="padding:8px;">Resolución Pacífica de Conflictos</td><td style="padding:8px;">Diálogo y acuerdos pacíficos sin violencia.</td></tr>
+                            <tr><td style="padding:8px;">Normas de Vida</td><td style="padding:8px;">Reglas del Salón y la Casa</td><td style="padding:8px;">Clasificación de acciones respetuosas e irresponsables.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>🤝 Simulador de Decisiones Étimas</h3>
+
+                <div style="background:#f9f9f9; padding:15px; border-radius:10px; margin-bottom:15px;">
+                    <h4>1. Situación: Un compañero tira sus útiles por accidente en el salón. ¿Qué debes hacer?</h4>
+                    <select id="inp-civ-1" class="input-std" style="max-width:320px;">
+                        <option value="">Selecciona tu respuesta...</option>
+                        <option value="a">Burlarte de él</option>
+                        <option value="b">Ayudarle amablemente a recogerlos</option>
+                        <option value="c">Ignorarlo y salir corriendo</option>
+                    </select>
+                    <button class="btn-primary" onclick="validarEjercicio('inp-civ-1', 'b', 'fb-civ-1', 2)">Comprobar</button>
+                    <span id="fb-civ-1" style="margin-left:10px; font-weight:bold;"></span>
+                </div>
             </div>
         `;
     }
 }
 
-// VALIDADOR GENÉRICO PARA LOS EJERCICIOS DE ESPAÑOL
+// VALIDADOR GENÉRICO PARA LOS EJERCICIOS DE MATERIAS
 function validarEjercicio(inputId, respuestaCorrecta, feedbackId, puntos) {
     const input = document.getElementById(inputId);
     const feedback = document.getElementById(feedbackId);
@@ -266,7 +432,7 @@ function validarEjercicio(inputId, respuestaCorrecta, feedbackId, puntos) {
         sumarEstrellas(puntos);
     } else {
         feedback.style.color = "red";
-        feedback.textContent = `Incorrecto. Intenta escribir: "${respuestaCorrecta}"`;
+        feedback.textContent = `Incorrecto. Intenta de nuevo o verifica la respuesta correcta.`;
     }
 }
 
