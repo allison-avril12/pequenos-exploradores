@@ -13,8 +13,8 @@ let juegoMate = { n1: 0, n2: 0, op: '+', resp: 0 };
 
 const materiasData = {
     espanol: {
-        titulo: "Español y Comprensión Lectora",
-        desc: "Aprende ortografía, gramática, sujeto y predicado, y reglas de acentuación con ejercicios prácticos.",
+        titulo: "Español, Ortografía, Gramática y Acentuación",
+        desc: "Aprende jugando con ejercicios interactivos, sopas de letras, ordenamiento de oraciones y clasificación de palabras.",
         icono: "fa-book"
     },
     ciencias: {
@@ -130,14 +130,119 @@ function mostrarPantalla(id) {
     }
 }
 
+// RENDERIZADO DETALLADO DE MATERIAS (INCLUYE ORTOGRAFÍA, GRAMÁTICA Y ACENTUACIÓN DE LAS IMÁGENES)
 function cargarMateria(clave) {
     document.querySelectorAll('.sub-tab').forEach(btn => btn.classList.remove('active'));
     const activeSubTab = document.getElementById(`btn-subtab-${clave}`);
-    if(activeSubTab) activeSubTab.classList.add('active');
+    if (activeSubTab) activeSubTab.classList.add('active');
 
     const data = materiasData[clave];
     const box = document.getElementById('materia-contenido-box');
-    if (box && data) {
+    if (!box || !data) return;
+
+    if (clave === 'espanol') {
+        box.innerHTML = `
+            <div class="subject-card">
+                <h3><i class="fa-solid ${data.icono}"></i> ${data.titulo}</h3>
+                <p>${data.desc}</p>
+                <hr style="margin:15px 0;">
+
+                <h4>📋 Resumen de Actividades de Ortografía, Gramática y Acentuación</h4>
+                <div style="overflow-x:auto; margin-bottom:20px;">
+                    <table style="width:100%; border-collapse:collapse; background:#fff; border-radius:8px; overflow:hidden; box-shadow:0 2px 4px rgba(0,0,0,0.05);">
+                        <thead style="background:var(--primary, #4A90E2); color:white;">
+                            <tr>
+                                <th style="padding:10px; text-align:left;">Tema</th>
+                                <th style="padding:10px; text-align:left;">Actividad</th>
+                                <th style="padding:10px; text-align:left;">¿En qué consiste?</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr style="border-bottom:1px solid #eee;"><td style="padding:8px;">Ortografía</td><td style="padding:8px;">Encuentra el error</td><td style="padding:8px;">Identificar palabras mal escritas y corregirlas.</td></tr>
+                            <tr style="border-bottom:1px solid #eee;"><td style="padding:8px;">Gramática</td><td style="padding:8px;">Ordena las palabras</td><td style="padding:8px;">Formar oraciones con palabras desordenadas.</td></tr>
+                            <tr style="border-bottom:1px solid #eee;"><td style="padding:8px;">Sujeto y predicado</td><td style="padding:8px;">Divide la oración</td><td style="padding:8px;">Identificar con colores el sujeto y el predicado.</td></tr>
+                            <tr style="border-bottom:1px solid #eee;"><td style="padding:8px;">Acentuación</td><td style="padding:8px;">Coloca la tilde</td><td style="padding:8px;">Escribir correctamente palabras que necesitan acento.</td></tr>
+                            <tr style="border-bottom:1px solid #eee;"><td style="padding:8px;">Reglas ortográficas</td><td style="padding:8px;">Completa la palabra</td><td style="padding:8px;">Elegir entre B o V, C o S, G o J.</td></tr>
+                            <tr style="border-bottom:1px solid #eee;"><td style="padding:8px;">Comprensión</td><td style="padding:8px;">Corrige el texto</td><td style="padding:8px;">Leer un pequeño párrafo y corregir sus errores.</td></tr>
+                            <tr><td style="padding:8px;">Acentuación</td><td style="padding:8px;">Clasifica las palabras</td><td style="padding:8px;">Separar palabras en agudas, graves, esdrújulas y sobresdrújulas.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>✏️ Ejercicios Prácticos Interactivos</h3>
+                
+                <!-- 1. Encuentra el error -->
+                <div style="background:#f9f9f9; padding:15px; border-radius:10px; margin-bottom:15px;">
+                    <h4>1. Encuentra el error (Corrige la palabra)</h4>
+                    <p>Corrige la palabra: <strong>Arvol</strong></p>
+                    <input type="text" id="inp-error-1" class="input-std" placeholder="Escribe la palabra correcta" style="max-width:250px;">
+                    <button class="btn-primary" onclick="validarEjercicio('inp-error-1', 'Árbol', 'fb-error-1', 2)">Comprobar</button>
+                    <span id="fb-error-1" style="margin-left:10px; font-weight:bold;"></span>
+                </div>
+
+                <!-- 2. Identifica el sujeto y predicado -->
+                <div style="background:#f9f9f9; padding:15px; border-radius:10px; margin-bottom:15px;">
+                    <h4>2. Identifica el sujeto y predicado</h4>
+                    <p>Oración: <em>"El perro corre en el parque."</em></p>
+                    <p>¿Cuál es el sujeto?</p>
+                    <input type="text" id="inp-sujeto-1" class="input-std" placeholder="Ej. El perro" style="max-width:250px;">
+                    <button class="btn-primary" onclick="validarEjercicio('inp-sujeto-1', 'El perro', 'fb-sujeto-1', 2)">Comprobar</button>
+                    <span id="fb-sujeto-1" style="margin-left:10px; font-weight:bold;"></span>
+                </div>
+
+                <!-- 3. Coloca las tildes -->
+                <div style="background:#f9f9f9; padding:15px; border-radius:10px; margin-bottom:15px;">
+                    <h4>3. Coloca las tildes</h4>
+                    <p>Escribe correctamente con tilde: <strong>Cancion</strong></p>
+                    <input type="text" id="inp-tilde-1" class="input-std" placeholder="Escribe la palabra acentuada" style="max-width:250px;">
+                    <button class="btn-primary" onclick="validarEjercicio('inp-tilde-1', 'Canción', 'fb-tilde-1', 2)">Comprobar</button>
+                    <span id="fb-tilde-1" style="margin-left:10px; font-weight:bold;"></span>
+                </div>
+
+                <!-- 4. Ordena las palabras -->
+                <div style="background:#f9f9f9; padding:15px; border-radius:10px; margin-bottom:15px;">
+                    <h4>4. Ordena las palabras</h4>
+                    <p>Palabras desordenadas: <strong>juega / parque / El / niño / en / el.</strong></p>
+                    <input type="text" id="inp-ordena-1" class="input-std" placeholder="Escribe la oración ordenada" style="max-width:350px;">
+                    <button class="btn-primary" onclick="validarEjercicio('inp-ordena-1', 'El niño juega en el parque.', 'fb-ordena-1', 2)">Comprobar</button>
+                    <span id="fb-ordena-1" style="margin-left:10px; font-weight:bold;"></span>
+                </div>
+
+                <!-- 5. Clasifica las palabras -->
+                <div style="background:#f9f9f9; padding:15px; border-radius:10px; margin-bottom:15px;">
+                    <h4>5. Clasifica las palabras (Agudas, Graves, Esdrújulas)</h4>
+                    <table style="width:100%; border-collapse:collapse; background:#fff; text-align:center;">
+                        <tr style="background:#eee;"><th>Agudas</th><th>Graves</th><th>Esdrújulas</th></tr>
+                        <tr><td>Café</td><td>Árbol</td><td>Música</td></tr>
+                        <tr><td>Canción</td><td>Lápiz</td><td>Pájaro</td></tr>
+                        <tr><td>Ratón</td><td>Mesa</td><td>Matemáticas</td></tr>
+                    </table>
+                    <p style="margin-top:10px;">¿Qué tipo de palabra es <strong>Pájaro</strong>?</p>
+                    <select id="inp-clasif-1" class="input-std" style="max-width:200px;">
+                        <option value="">Selecciona...</option>
+                        <option value="Aguda">Aguda</option>
+                        <option value="Grave">Grave</option>
+                        <option value="Esdrújula">Esdrújula</option>
+                    </select>
+                    <button class="btn-primary" onclick="validarEjercicio('inp-clasif-1', 'Esdrújula', 'fb-clasif-1', 2)">Comprobar</button>
+                    <span id="fb-clasif-1" style="margin-left:10px; font-weight:bold;"></span>
+                </div>
+
+                <!-- Otras actividades creativas -->
+                <div style="background:#eef6ff; padding:15px; border-radius:10px; margin-top:15px;">
+                    <h4>🎨 Otras actividades creativas recomendadas</h4>
+                    <ul style="margin-left:20px; line-height:1.8;">
+                        <li>🧩 <strong>Rompecabezas de oraciones:</strong> Une bloques para armar oraciones coherentes.</li>
+                        <li>🏆 <strong>Concurso de deletreo:</strong> Demuestra tu nivel letra por letra.</li>
+                        <li>🎨 <strong>Colorear sujeto y predicado:</strong> Marca en azul el sujeto y en rojo el predicado.</li>
+                        <li>🎲 <strong>Dados de palabras:</strong> Lanza dados virtuales para formar oraciones aleatorias.</li>
+                        <li>🔍 <strong>Sopa de letras:</strong> Encuentra palabras correctamente escritas.</li>
+                        <li>🧠 <strong>Trivia de ortografía y gramática:</strong> Preguntas exprés para ganar estrellas extra.</li>
+                    </ul>
+                </div>
+            </div>
+        `;
+    } else {
         box.innerHTML = `
             <div class="subject-card">
                 <h3><i class="fa-solid ${data.icono}"></i> ${data.titulo}</h3>
@@ -145,6 +250,23 @@ function cargarMateria(clave) {
                 <button class="btn-primary" style="margin-top: 15px;" onclick="sumarEstrellas(2)">Completar Módulo (+2 ⭐)</button>
             </div>
         `;
+    }
+}
+
+// VALIDADOR GENÉRICO PARA LOS EJERCICIOS DE ESPAÑOL
+function validarEjercicio(inputId, respuestaCorrecta, feedbackId, puntos) {
+    const input = document.getElementById(inputId);
+    const feedback = document.getElementById(feedbackId);
+    if (!input || !feedback) return;
+
+    const val = input.value.trim();
+    if (val.toLowerCase() === respuestaCorrecta.toLowerCase()) {
+        feedback.style.color = "green";
+        feedback.textContent = `¡Correcto! (+${puntos} ⭐)`;
+        sumarEstrellas(puntos);
+    } else {
+        feedback.style.color = "red";
+        feedback.textContent = `Incorrecto. Intenta escribir: "${respuestaCorrecta}"`;
     }
 }
 

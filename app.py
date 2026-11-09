@@ -220,3 +220,6 @@ def actualizar_estrellas():
             return jsonify({'success': True, 'estrellas': nuevas_estrellas, 'nivel': nuevo_nivel})
     finally:
         conn.close()
+
+if __name__ == '__main__':
+    app.run(debug=True)
