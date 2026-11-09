@@ -1,0 +1,5 @@
+Flask
+pymysql
+qrcode
+pillow
+cryptography
